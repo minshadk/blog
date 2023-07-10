@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const app = require("./app");
+
 const Document = require("./models/document");
 
 dotenv.config({ path: "./config.env" });
@@ -20,9 +22,10 @@ const defaultValue = "";
 
 io.on("connection", (socket) => {
   console.log("connected");
-  socket.on("get-document", async (documentId) => {
+  socket.on("get-document", async (documentId, userId) => {
+    console.log(userId);
     // const data = "";
-    const document = await findOrCreateDocument(documentId);
+    const document = await findOrCreateDocument(documentId, userId);
 
     socket.join(documentId);
     socket.emit("load-document", document.data);
@@ -33,16 +36,20 @@ io.on("connection", (socket) => {
     });
 
     socket.on("save-document", async (data) => {
-      console.log("save docment ")
+      console.log("save docment ");
       await Document.findByIdAndUpdate(documentId, { data });
     });
-  }); 
+  });
 });
 
-async function findOrCreateDocument(id) {
+async function findOrCreateDocument(id, userId) {
   if (id == null) return;
 
   const document = await Document.findById(id);
   if (document) return document;
-  return await Document.create({ _id: id, data: defaultValue });
+  return await Document.create({ _id: id, data: defaultValue, userId: userId });
 }
+
+app.listen(3002, () => {
+  console.log(`App running on port ${3001}`);
+});

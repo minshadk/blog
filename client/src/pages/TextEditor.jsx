@@ -20,9 +20,12 @@ const TOOLBAR_OPTIONS = [
 ];
 
 export default function TextEditor() {
+  const userId = localStorage.getItem("userId");
   const { id: documentId } = useParams();
+  console.log(documentId)
   const [socket, setSocket] = useState();
   const [quill, setQuill] = useState();
+  console.log(userId);
 
   useEffect(() => {
     const socketConnection = io("http://localhost:3001");
@@ -40,10 +43,10 @@ export default function TextEditor() {
     socket.once("load-document", (document) => {
       console.log("load document");
       quill.setContents(document);
-      quill.enable(); 
+      quill.enable();
     });
 
-    socket.emit("get-document", documentId);
+    socket.emit("get-document", documentId, userId);
   }, [socket, quill, documentId]);
 
   useEffect(() => {
